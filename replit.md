@@ -1,6 +1,6 @@
-# [Project name]
+# Personal Expense Tracker
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A personal finance dashboard for recording transactions, setting category budgets, reviewing spending analytics, and exporting filtered records.
 
 ## Run & Operate
 

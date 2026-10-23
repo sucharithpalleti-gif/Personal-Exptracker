@@ -10,6 +10,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: expenses
+    description: Expense transactions
+  - name: categories
+    description: Spending categories and budgets
+  - name: analytics
+    description: Spending summaries and trends
 paths:
   /healthz:
     get:
@@ -24,6 +30,185 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /expenses:
+    get:
+      operationId: getExpenses
+      tags: [expenses]
+      summary: List expenses with optional filters
+      parameters:
+        - in: query
+          name: startDate
+          schema: { type: string }
+        - in: query
+          name: endDate
+          schema: { type: string }
+        - in: query
+          name: categoryId
+          schema: { type: integer }
+        - in: query
+          name: paymentMethod
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        "200":
+          description: Filtered expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Expense" }
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Create an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExpenseInput" }
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Expense" }
+  /expenses/{id}:
+    put:
+      operationId: updateExpense
+      tags: [expenses]
+      summary: Update an expense
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExpenseInput" }
+      responses:
+        "200":
+          description: Updated expense
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Expense" }
+        "404": { description: Expense not found }
+    delete:
+      operationId: deleteExpense
+      tags: [expenses]
+      summary: Delete an expense
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204": { description: Expense deleted }
+        "404": { description: Expense not found }
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: List categories and budget limits
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Category" }
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryInput" }
+      responses:
+        "201":
+          description: Created category
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+  /categories/{id}:
+    put:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category and budget
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryInput" }
+      responses:
+        "200":
+          description: Updated category
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+        "404": { description: Category not found }
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [analytics]
+      summary: Get filtered expense metrics and chart data
+      parameters:
+        - in: query
+          name: startDate
+          schema: { type: string }
+        - in: query
+          name: endDate
+          schema: { type: string }
+        - in: query
+          name: categoryId
+          schema: { type: integer }
+        - in: query
+          name: paymentMethod
+          schema: { type: string }
+      responses:
+        "200":
+          description: Analytics summary and chart series
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Analytics" }
+  /export.csv:
+    get:
+      operationId: exportExpensesCsv
+      tags: [expenses]
+      summary: Download filtered expenses as CSV
+      parameters:
+        - in: query
+          name: startDate
+          schema: { type: string }
+        - in: query
+          name: endDate
+          schema: { type: string }
+        - in: query
+          name: categoryId
+          schema: { type: integer }
+        - in: query
+          name: paymentMethod
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        "200":
+          description: CSV download
+          content:
+            text/csv:
+              schema: { type: string }
 components:
   schemas:
     HealthStatus:
@@ -33,4 +218,90 @@ components:
           type: string
       required:
         - status
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        budgetLimit: { type: number }
+        color: { type: string }
+      required: [id, name, budgetLimit, color]
+    CategoryInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        budgetLimit: { type: number, minimum: 0 }
+        color: { type: string, minLength: 4, maxLength: 10 }
+      required: [name, budgetLimit, color]
+    Expense:
+      type: object
+      properties:
+        id: { type: integer }
+        date: { type: string, format: date }
+        categoryId: { type: integer }
+        categoryName: { type: string }
+        categoryColor: { type: string }
+        categoryBudget: { type: number }
+        amount: { type: number }
+        description: { type: ["string", "null"] }
+        paymentMethod: { type: string }
+        recurring: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, date, categoryId, categoryName, categoryColor, categoryBudget, amount, description, paymentMethod, recurring, createdAt]
+    ExpenseInput:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        categoryId: { type: integer }
+        amount: { type: number, exclusiveMinimum: 0 }
+        description: { type: ["string", "null"], maxLength: 255 }
+        paymentMethod: { type: string, minLength: 1, maxLength: 50 }
+        recurring: { type: boolean }
+      required: [date, categoryId, amount, paymentMethod, recurring]
+    MonthlySpend:
+      type: object
+      properties:
+        month: { type: string }
+        amount: { type: number }
+      required: [month, amount]
+    CategorySpend:
+      type: object
+      properties:
+        categoryId: { type: integer }
+        name: { type: string }
+        color: { type: string }
+        amount: { type: number }
+        budget: { type: number }
+        utilization: { type: number }
+      required: [categoryId, name, color, amount, budget, utilization]
+    Analytics:
+      type: object
+      properties:
+        total: { type: number }
+        count: { type: integer }
+        average: { type: number }
+        median: { type: number }
+        standardDeviation: { type: number }
+        minimum: { type: number }
+        maximum: { type: number }
+        percentile75: { type: number }
+        averageDaily: { type: number }
+        recurringTotal: { type: number }
+        nonRecurringTotal: { type: number }
+        topCategory: { type: ["string", "null"] }
+        monthly:
+          type: array
+          items: { $ref: "#/components/schemas/MonthlySpend" }
+        categories:
+          type: array
+          items: { $ref: "#/components/schemas/CategorySpend" }
+        daily:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              amount: { type: number }
+            required: [date, amount]
+      required: [total, count, average, median, standardDeviation, minimum, maximum, percentile75, averageDaily, recurringTotal, nonRecurringTotal, topCategory, monthly, categories, daily]
 

@@ -1,0 +1,1 @@
+- [Orval client generation](orval-client-generation.md) — keep date-only query params as strings; generated Zod `date()` expects Date objects, not URL strings.

@@ -1,0 +1,170 @@
+MASTER PROMPT FOR REPLIT / CODE GENERATOR
+Role & Persona:
+
+Act as a Principal Full Stack Engineer and Senior Fintech UI/UX Designer. Build a complete, production-grade Personal Expense Tracking & Analysis System featuring a high-density, Linear/Stripe-inspired dark-mode dashboard with card-based widgets, drag-and-drop dynamic layouts, statistical analytics, and dark-themed Matplotlib visualization export capabilities.
+
+📁 1. PROJECT ARCHITECTURE
+Generate all files with full, non-truncated, clean, and modular code:
+
+Plaintext
+personal_expense_tracker/
+├── app.py                 # Core Flask Web Application with REST endpoints & rendering logic
+├── database.sql           # Complete MySQL Schema DDL script + initial seed data
+├── analytics.py           # Pandas & NumPy analysis pipeline (stats, filtering, summaries)
+├── plotting.py            # Matplotlib chart engine (custom dark mode, high-DPI base64/PNG rendering)
+├── requirements.txt       # Production python dependencies
+└── templates/
+    └── index.html         # Single-page dynamic Fintech Dashboard (Tailwind CDN, SortableJS, Lucide icons, Chart.js/Matplotlib integration)
+🗄️ 2. DATABASE SCHEMA (database.sql)
+Provide a resilient DDL script for MySQL with foreign key constraints, indexes, check constraints, and sample seed data:
+
+categories Table:
+
+category_id INT AUTO_INCREMENT PRIMARY KEY
+
+category_name VARCHAR(100) NOT NULL UNIQUE
+
+budget_limit DECIMAL(10,2) DEFAULT 0.00 (New Feature: Budget tracking per category)
+
+color_code VARCHAR(10) DEFAULT '#10b981' (For badge dynamic styling)
+
+expenses Table:
+
+expense_id INT AUTO_INCREMENT PRIMARY KEY
+
+expense_date DATE NOT NULL
+
+category_id INT NOT NULL
+
+amount DECIMAL(10,2) NOT NULL CHECK (amount > 0)
+
+description VARCHAR(255)
+
+payment_method VARCHAR(50) NOT NULL DEFAULT 'Credit Card'
+
+is_recurring BOOLEAN DEFAULT FALSE (New Feature: Subscription/Recurring identifier)
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Foreign Key: FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+
+Indexes on expense_date and category_id for quick queries.
+
+📊 3. DATA & VISUALIZATION PIPELINE
+A. Analytics Engine (analytics.py)
+Use Pandas and NumPy to process SQL queries into structured analytical dataframes/JSON:
+
+Filtering: Date ranges (start_date, end_date), payment methods, and specific category selections.
+
+Aggregations (Pandas):
+
+Monthly spending trends.
+
+Category-wise spending breakdown with variance relative to budget limits.
+
+Identification of top spending category and highest individual transactions.
+
+Recurring vs. non-recurring expenditure split.
+
+Statistical Summaries (NumPy):
+
+Mean, Median, Standard Deviation, Max, Min, and Total spend.
+
+75th percentile expense threshold detection.
+
+B. Visualizations Engine (plotting.py)
+Generate dark-themed Matplotlib charts converted directly to base64 strings (or saved safely to disk) for zero-latency dashboard embedding:
+
+Design System for Matplotlib: Match #0f172a canvas, transparent background elements, #1e293b plot area, #10b981 primary bar color, vibrant secondary accent colors (#3b82f6, #8b5cf6, #f59e0b), #f8fafc text typography, and clean gridlines.
+
+Charts Created:
+
+Month-wise Spend Bar Chart: Gradient bars with value labels on top.
+
+Category Distribution Pie/Donut Chart: Donut chart with legend and percentage markers.
+
+Daily Spend Trend Sparkline/Area Chart: Smooth trendlines showing spend momentum over time.
+
+⚡ 4. BACKEND FLASK APP (app.py)
+Implement dynamic connection pooling (using PyMySQL or mysql-connector-python).
+
+Fallback support: Include auto-fallback to an in-memory or file-based SQLite database if MySQL environment variables (MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB) are not set, ensuring seamless execution on Replit out-of-the-box.
+
+REST API Endpoints:
+
+GET / - Main Dashboard UI.
+
+GET /api/expenses - Fetch filtered expenses (JSON).
+
+POST /api/expenses/add - Validate & insert new expense.
+
+PUT /api/expenses/update/<id> - Update existing expense.
+
+DELETE /api/expenses/delete/<id> - Delete an expense.
+
+GET /api/analytics - Return statistical metrics (Mean, Std, Median, Top Category, Budget Utilizations).
+
+GET /api/charts/bar & GET /api/charts/pie - Render dynamically refreshed Matplotlib base64 images.
+
+GET /api/export/csv - Download filtered transactions as CSV.
+
+🎨 5. FINTECH UI/UX DASHBOARD DESIGN (templates/index.html)
+Create an ultra-modern, high-density dashboard inspired by Linear & Stripe:
+
+Color Palette & Design Tokens:
+
+Background: Deep slate/charcoal #0f172a
+
+Card Containers: #1e293b with subtle 1px border (#334155)
+
+Accent Color: Emerald Green (#10b981) for positive numbers/metrics, Rose Red (#f43f5e) for over-budget alerts.
+
+Text Hierarchy: Crisp white headers (#f8fafc), muted slate metadata (#94a3b8).
+
+Dynamic Layout & Drag-and-Drop:
+
+Integrated SortableJS grid allowing users to reorder widgets dynamically (e.g., Summary Metrics -> Charts Grid -> Add Form -> Transactions Table).
+
+Layout state stored in localStorage so widget orders persist across page reloads.
+
+Key UI Components & Widgets:
+
+Top Navigation Bar: Title, Date Quick-Selector (This Month, Last 30 Days, YTD, Custom Range), and Quick Export Button.
+
+Metric Cards Grid (KPIs): Total Spent, Average Daily Spend, Highest Expense, Standard Deviation, Budget Health Meter.
+
+Quick Add / Dynamic Form Card: Real-time form with date picker, category dropdown, amount input with currency symbol, payment method, description, and "Recurring" toggle.
+
+Dynamic Chart Grid: Embedded Matplotlib responsive charts + toggle switch for interactive JS Chart.js view.
+
+High-Density Expense Table:
+
+Compact row height, clear right-aligned monetary figures ($1,234.50).
+
+Pill-shaped badge tags for categories with custom background colors.
+
+Search filter bar, payment icon indicators, quick inline action buttons (Edit, Delete).
+
+Modal Components: Clean dialog for full-record editing.
+
+📦 6. DEPENDENCIES (requirements.txt)
+Plaintext
+Flask>=3.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+PyMySQL>=1.1.0
+python-dotenv>=1.0.0
+✨ EXTENDED / BONUS FEATURES INCLUDED IN THIS IMPLEMENTATION
+Category Budget Over-Budget Alerts: Visual progress bar in category breakdown alerting when expenditure crosses 80% or 100% of defined budget.
+
+SQLite Auto-Fallback: Zero-config execution in environments like Replit where MySQL setup might be optional.
+
+CSV Export functionality: Direct export endpoint for external data audit.
+
+Interactive Dashboard Widget Layout: Reorderable dashboard widgets using Drag-and-Drop (SortableJS) with dynamic layout memory.
+
+Statistical Insights Drawer: Deep-dive statistics panel exposing median, variance, std dev, and spend distribution percentiles powered by NumPy.
+
+🚀 Instructions to Execute
+Generate all 6 files with clean, fully written code without skipping lines or using placeholders (// todo: implement this). Ensure all JavaScript, CSS, and Python code are valid and ready to run immediately on Replit.
